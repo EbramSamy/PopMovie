@@ -35,6 +35,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.ebram.popmovies.MainActivity" />
         </activity>
+        <provider
+            android:authorities="com.example.ebram.popmovies.app"
+            android:name=".Data.MovieProvider" />
     </application>
 
 </manifest>
