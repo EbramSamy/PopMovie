@@ -1,5 +1,6 @@
 package com.example.ebram.popmovies;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -16,15 +17,24 @@ import java.net.URL;
 /**
  * Created by Ebram on 8/22/2015.
  */
-public class FetchMovies extends AsyncTask<MainActivityFragment.MyParams, Void, Movie[]> {
+public class FetchMovies extends AsyncTask<String, Void, Void> {
     private final String LOG_TAG = FetchMovies.class.getSimpleName();
-    MovieAdapter mAdapter;
+    //MovieAdapter mAdapter;
+    MovieCursorAdapter mAdapter;
     String SORT_TYPE;
+    private final Context mContext;
+
+
+    public FetchMovies(Context context) {
+        mContext = context;
+    }
+
 
     @Override
-    protected Movie[] doInBackground(MainActivityFragment.MyParams... params) {
-        mAdapter = params[0].movieAdapter;
-        SORT_TYPE = params[0].sortType;
+    protected Void doInBackground(String... params) {
+        //mAdapter = params[0].movieAdapter;
+        //SORT_TYPE = params[0].sortType;
+        SORT_TYPE=params[0];
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String moviesJsonStr = null;
@@ -63,10 +73,10 @@ public class FetchMovies extends AsyncTask<MainActivityFragment.MyParams, Void, 
 
             if (buffer.length() == 0) {
                 // Stream was empty.  No point in parsing.
-                return null;
+                return null ;
             }
             moviesJsonStr = buffer.toString();
-            Log.v(LOG_TAG, "Tweets String :" + moviesJsonStr);
+            Log.v(LOG_TAG, "Movies String :" + moviesJsonStr);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             return null;
@@ -83,15 +93,16 @@ public class FetchMovies extends AsyncTask<MainActivityFragment.MyParams, Void, 
             }
         }
         try {
-            return ParseJson.getMoviesFromJson(moviesJsonStr);
+            int inserted =ParseJson.getMoviesFromJson(moviesJsonStr,SORT_TYPE,mContext);
+            Log.d(LOG_TAG, "FetchMoviesTask Complete. " + inserted + " Inserted");
         } catch (JSONException ex) {
             Log.e(LOG_TAG, ex.getMessage(), ex);
             ex.printStackTrace();
         }
-        return null;
+        return null ;
     }
 
-    @Override
+   /* @Override
     protected void onPostExecute(Movie[] result) {
 
         if (result != null) {
@@ -100,5 +111,5 @@ public class FetchMovies extends AsyncTask<MainActivityFragment.MyParams, Void, 
                 mAdapter.add(t);
             }
         }
-    }
+    }*/
 }

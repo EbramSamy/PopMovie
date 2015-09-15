@@ -17,13 +17,14 @@ public class MovieProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private MovieDbHelper mOpenHelper;
 
-    static final int MOVIE = 100;
-
+    static final int POP_MOVIE = 100;
+    static final int RATED_MOVIE = 101;
 
     static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
-        matcher.addURI(authority, MovieContract.PATH_MOVIES, MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_PopMOVIES, POP_MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_RatedMOVIES, RATED_MOVIE);
         return matcher;
     }
 
@@ -35,8 +36,12 @@ public class MovieProvider extends ContentProvider {
 
         switch (match) {
             // Student: Uncomment and fill out these two cases
-            case MOVIE:
-                return MovieContract.MovieEntry.CONTENT_TYPE;
+            case POP_MOVIE:
+                return MovieContract.PopMovieEntry.CONTENT_TYPE;
+
+            case RATED_MOVIE:
+                return MovieContract.RatedMovieEntry.CONTENT_TYPE;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -58,9 +63,22 @@ public class MovieProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
 
 
-            case MOVIE: {
+            case POP_MOVIE: {
                 retCursor = mOpenHelper.getReadableDatabase().query(
-                        MovieContract.MovieEntry.TABLE_NAME,
+                        MovieContract.PopMovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            }
+
+            case RATED_MOVIE: {
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.RatedMovieEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -84,10 +102,18 @@ public class MovieProvider extends ContentProvider {
         Uri returnUri;
 
         switch (match) {
-            case MOVIE: {
-                long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
+            case POP_MOVIE: {
+                long _id = db.insert(MovieContract.PopMovieEntry.TABLE_NAME, null, values);
                 if (_id > 0)
-                    returnUri = MovieContract.MovieEntry.buildMovieUri(_id);
+                    returnUri = MovieContract.PopMovieEntry.buildMovieUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case RATED_MOVIE: {
+                long _id = db.insert(MovieContract.RatedMovieEntry.TABLE_NAME, null, values);
+                if (_id > 0)
+                    returnUri = MovieContract.RatedMovieEntry.buildMovieUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -106,9 +132,14 @@ public class MovieProvider extends ContentProvider {
         int rowsDeleted;
 
         switch (match) {
-            case MOVIE:
+            case POP_MOVIE:
                 rowsDeleted = db.delete(
-                        MovieContract.MovieEntry.TABLE_NAME, selection, selectionArgs);
+                        MovieContract.PopMovieEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+
+            case RATED_MOVIE:
+                rowsDeleted = db.delete(
+                        MovieContract.RatedMovieEntry.TABLE_NAME, selection, selectionArgs);
                 break;
 
             default:
@@ -128,8 +159,13 @@ public class MovieProvider extends ContentProvider {
         int rowsUpdated;
 
         switch (match) {
-            case MOVIE:
-                rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection,
+            case POP_MOVIE:
+                rowsUpdated = db.update(MovieContract.PopMovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+
+            case RATED_MOVIE:
+                rowsUpdated = db.update(MovieContract.RatedMovieEntry.TABLE_NAME, values, selection,
                         selectionArgs);
                 break;
 
@@ -146,13 +182,31 @@ public class MovieProvider extends ContentProvider {
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
+        int returnCount;
         switch (match) {
-            case MOVIE:
+            case POP_MOVIE:
                 db.beginTransaction();
-                int returnCount = 0;
+                 returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-                        long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, value);
+                        long _id = db.insert(MovieContract.PopMovieEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+
+            case RATED_MOVIE:
+                db.beginTransaction();
+                 returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MovieContract.RatedMovieEntry.TABLE_NAME, null, value);
                         if (_id != -1) {
                             returnCount++;
                         }

@@ -26,9 +26,9 @@ public class MovieDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView=inflater.inflate(R.layout.fragment_movie_details, container, false);
+     View rootView=inflater.inflate(R.layout.fragment_movie_details, container, false);
         Intent i = getActivity().getIntent();
-        Movie movie = (Movie) i.getSerializableExtra("Movie");
+          /* Movie movie = (Movie) i.getSerializableExtra("Movie");
         TextView releaseDate = (TextView) rootView.findViewById(R.id.dateText);
 
         TextView title = (TextView) rootView.findViewById(R.id.titleText);
@@ -49,7 +49,7 @@ public class MovieDetailsFragment extends Fragment {
         } catch (MalformedURLException e) {
             Toast toast = Toast.makeText(getActivity(), "No Poster", Toast.LENGTH_SHORT);
             toast.show();
-        }
+        }*/
         return rootView;
     }
 }
