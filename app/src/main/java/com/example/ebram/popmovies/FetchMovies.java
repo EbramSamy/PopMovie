@@ -35,7 +35,7 @@ public class FetchMovies extends AsyncTask<MainActivityFragment.MyParams, Void, 
             final String SORT_BY = "sort_by";
             Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
                     .appendQueryParameter(SORT_BY, SORT_TYPE)
-                    .appendQueryParameter(API_KEY, )
+                    .appendQueryParameter(API_KEY, "e33348f318497bfd04e79a89e9b6ca1c")
                     .build();
             URL url = new URL(builtUri.toString());
 
